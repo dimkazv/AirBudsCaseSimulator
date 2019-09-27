@@ -1,0 +1,64 @@
+{
+  "project_info": {
+    "project_number": "173856417412",
+    "firebase_url": "https://airpods-case-simulator-project.firebaseio.com",
+    "project_id": "airpods-case-simulator-project",
+    "storage_bucket": "airpods-case-simulator-project.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:173856417412:android:243e8ce5fd9509f8",
+        "android_client_info": {
+          "package_name": "com.dmz.airpodscasesimulator"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "173856417412-2u880il8bb7ha6aa8st979neueb3rj29.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dmz.airpodscasesimulator",
+            "certificate_hash": "b03b8cc586d436dd333c3371e3fa58a573f57d2b"
+          }
+        },
+        {
+          "client_id": "173856417412-43f7kmesu4s8il1phkjtgfj784cvnb3s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dmz.airpodscasesimulator",
+            "certificate_hash": "5df075d3d9edb1460e0e94f4b404db94b45e993d"
+          }
+        },
+        {
+          "client_id": "173856417412-pdbmgrjsev8mfn518r2iqqd5028bdkl6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvmWK1DXQX4UwXS5kYgs2LEfkm-dGupeU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "173856417412-pdbmgrjsev8mfn518r2iqqd5028bdkl6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      },
+      "admob_app_id": "ca-app-pub-3254112346644116~7938885729"
+    }
+  ],
+  "configuration_version": "1"
+}

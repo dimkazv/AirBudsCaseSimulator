@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    tools:context=".MainActivity">
+
+    <ViewFlipper
+        android:id="@+id/imageSwitcher"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="50dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginEnd="50dp"
+        android:layout_marginRight="50dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/imagePlayer1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/o1min"
+            android:adjustViewBounds="true"
+            android:background="@color/colorPrimaryDark"
+            android:cropToPadding="false"
+            android:scaleType="centerInside"
+            />
+        <ImageView
+            android:id="@+id/imagePlayer2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/o2min"
+            android:adjustViewBounds="true"
+            android:background="@color/colorPrimaryDark"
+            android:cropToPadding="false"
+            android:scaleType="centerInside"
+            />
+        <ImageView
+            android:id="@+id/imagePlayer3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/o3min"
+            android:adjustViewBounds="true"
+            android:background="@color/colorPrimaryDark"
+            android:cropToPadding="false"
+            android:scaleType="centerInside"
+            />
+        <ImageView
+            android:id="@+id/imagePlayer4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/o4min"
+            android:adjustViewBounds="true"
+            android:background="@color/colorPrimaryDark"
+            android:cropToPadding="false"
+            android:scaleType="centerInside"
+            />
+        <ImageView
+            android:id="@+id/imagePlayer5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/o5min"
+            android:adjustViewBounds="true"
+            android:background="@color/colorPrimaryDark"
+            android:cropToPadding="false"
+            android:scaleType="centerInside"
+            />
+        <ImageView
+            android:id="@+id/imagePlayer6"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/o6min"
+            android:adjustViewBounds="true"
+            android:background="@color/colorPrimaryDark"
+            android:cropToPadding="false"
+            android:scaleType="centerInside"
+            />
+        <ImageView
+            android:id="@+id/imagePlayer7"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/o7min"
+            android:adjustViewBounds="true"
+            android:background="@color/colorPrimaryDark"
+            android:cropToPadding="false"
+            android:scaleType="centerInside"
+            />
+    </ViewFlipper>
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="13dp"
+        android:text="@string/_0"
+        android:textColor="#80000000"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:typeface="monospace"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <Button
+        android:id="@+id/corky"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:paddingEnd="-5dp"
+        android:paddingRight="-5dp"
+        android:text="@string/menu"
+        android:textColor="#80000000"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/adView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+
+        app:adSize="BANNER"
+        app:adUnitId="ca-app-pub-3254112346644116/8075397344"
+        app:layout_anchorGravity="bottom|center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:id="@+id/buyButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@android:color/transparent"
+        android:paddingTop="11dp"
+        android:src="@drawable/adbutton"
+
+        app:layout_anchorGravity="top|center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+</android.support.constraint.ConstraintLayout>
