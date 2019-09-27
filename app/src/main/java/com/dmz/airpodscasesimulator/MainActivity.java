@@ -31,15 +31,21 @@ import android.widget.ViewFlipper;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
+import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.ConsumeParams;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesUpdatedListener;
+import com.android.billingclient.api.SkuDetails;
+import com.android.billingclient.api.SkuDetailsParams;
+import com.android.billingclient.api.SkuDetailsResponseListener;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements PurchasesUpdatedListener {
@@ -52,11 +58,8 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
     static final String ITEM_SKU_ADREMOVAL5 = "disable_ads5";
     String lastSku;
 
-    static final int[] drawable = {R.drawable.o1min, R.drawable.o2min, R.drawable.o7min, R.drawable.o3min, R.drawable.o4min, R.drawable.o5min, R.drawable.o6min};
-
     private BillingClient mBillingClient;
 
-    //public ImageView img;
     public ViewFlipper imgs;
     public TextView tv;
     public MediaPlayer mPlayer;
@@ -94,12 +97,12 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
         adRequest = new AdRequest.Builder().build();
         mInterstitialAd = new InterstitialAd(MainActivity.this);
         mInterstitialAd.setAdUnitId("ca-app-pub-3254112346644116/4389752444");
-        mBillingClient = BillingClient.newBuilder(this).setListener(this).build();
+        mBillingClient = BillingClient.newBuilder(this).enablePendingPurchases().setListener(this).build();
         mBillingClient.startConnection(new BillingClientStateListener() {
 
             @Override
-            public void onBillingSetupFinished(int responseCode) {
-                if (responseCode == BillingClient.BillingResponse.OK) {
+            public void onBillingSetupFinished(BillingResult billingResult) {
+                if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
                     List<Purchase> purchaseDataList = mBillingClient.queryPurchases(BillingClient.SkuType.INAPP).getPurchasesList();
                     if (purchaseDataList.size() != 0) {
                         sp.edit().putBoolean("adsdis", true).commit();
@@ -120,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
             }
         });
 
-        ImageButton mBuyButton = (ImageButton) findViewById(R.id.buyButton);
+        ImageButton mBuyButton = findViewById(R.id.buyButton);
         mBuyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -152,39 +155,41 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
 
     }
 
+
     @Override
-    public void onPurchasesUpdated(int responseCode, @Nullable List<Purchase> purchases) {
+    public void onPurchasesUpdated(BillingResult billingResult, @Nullable List<Purchase> purchases) {
 
 
-        if (responseCode == BillingClient.BillingResponse.OK && purchases != null) {
+        if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && purchases != null) {
             for (Purchase purchase : purchases) {
                 handlePurchase(purchase);
             }
-        } else if (responseCode == BillingClient.BillingResponse.USER_CANCELED) {
-            Log.d(TAG, "User Canceled" + responseCode);
-        } else if (responseCode == BillingClient.BillingResponse.ITEM_ALREADY_OWNED) {
-            sp.edit().putBoolean("adsdis", true).commit();
+        } else if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.USER_CANCELED) {
+            Log.d(TAG, "User Canceled" + billingResult.getResponseCode());
+        } else if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED) {
+            sp.edit().putBoolean("adsdis", true).apply();
             mAdFree = sp.getBoolean("adsdis", false);
             List<Purchase> purchaseDataList = mBillingClient.queryPurchases(BillingClient.SkuType.INAPP).getPurchasesList();
             for (Purchase purchaseData : purchaseDataList) {
                 if (purchaseData.getSku().equals(lastSku)) {
-                    mBillingClient.consumeAsync(purchaseData.getPurchaseToken(), new ConsumeResponseListener() {
+                    ConsumeParams consumeParams = ConsumeParams.newBuilder().setPurchaseToken(purchaseData.getPurchaseToken()).build();
+                    mBillingClient.consumeAsync(consumeParams, new ConsumeResponseListener() {
                         @Override
-                        public void onConsumeResponse(int responseCode, String purchaseToken) {
+                        public void onConsumeResponse(BillingResult billingResult, String purchaseToken) {
                             purchase(lastSku);
                         }
                     });
                 }
             }
         } else {
-            Log.d(TAG, "Other code" + responseCode);
+            Log.d(TAG, "Other code" + billingResult.getResponseCode());
         }
     }
 
 
     private void handlePurchase(Purchase purchase) {
         if (purchase.getSku().equals(ITEM_SKU_ADREMOVAL) || purchase.getSku().equals(ITEM_SKU_ADREMOVAL2) || purchase.getSku().equals(ITEM_SKU_ADREMOVAL3)) {
-            sp.edit().putBoolean("adsdis", true).commit();
+            sp.edit().putBoolean("adsdis", true).apply();
             mAdFree = sp.getBoolean("adsdis", false);
             MainActivity.this.recreate();
             Toast toast = Toast.makeText(getApplicationContext(), "Thank you!", Toast.LENGTH_LONG);
@@ -315,7 +320,7 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
                                 editor.putInt("score", Example.c);
                                 editor.putBoolean("sound", mCheckedItems[0]);
                                 editor.putBoolean("vibr", mCheckedItems[1]);
-                                editor.commit();
+                                editor.apply();
                             }
                         })
 
@@ -326,7 +331,7 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
                                     {
                                         try {
                                             mInterstitialAd.show();
-                                        } catch (IllegalStateException e) {
+                                        } catch (IllegalStateException ignored) {
 
                                         }
                                     }
@@ -349,7 +354,7 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
                         tv.setText(Example.c + "");
                         SharedPreferences.Editor editor = sp.edit();
                         editor.putInt("score", Example.c);
-                        editor.commit();
+                        editor.apply();
                     }
                 });
                 return builder.create();
@@ -430,8 +435,17 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
 
     public void purchase(String SKU) {
         lastSku = SKU;
-        BillingFlowParams flowParams = BillingFlowParams.newBuilder().setSku(SKU).setType(BillingClient.SkuType.INAPP).build();
-        int responseCode = mBillingClient.launchBillingFlow(MainActivity.this, flowParams);
+        List<String> skuList = new ArrayList<>();
+        skuList.add(SKU);
+
+        SkuDetailsParams skuDetailsParams = SkuDetailsParams.newBuilder().setSkusList(skuList).setType(BillingClient.SkuType.INAPP).build();
+        mBillingClient.querySkuDetailsAsync(skuDetailsParams, new SkuDetailsResponseListener() {
+            @Override
+            public void onSkuDetailsResponse(BillingResult billingResult, List<SkuDetails> skuDetailsList) {
+                BillingFlowParams flowParams = BillingFlowParams.newBuilder().setSkuDetails(skuDetailsList.get(0)).build();
+                BillingResult responseCode = mBillingClient.launchBillingFlow(MainActivity.this, flowParams);
+            }
+        });
     }
 
     /*public void onBackPressed() {
