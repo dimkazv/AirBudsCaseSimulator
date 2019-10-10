@@ -1,6 +1,7 @@
 package com.dmz.airpodscasesimulator;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,6 +18,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.ImageButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -39,13 +41,18 @@ import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsParams;
 import com.android.billingclient.api.SkuDetailsResponseListener;
+import com.google.ads.consent.ConsentInformation;
+import com.google.ads.consent.DebugGeography;
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements PurchasesUpdatedListener {
@@ -77,6 +84,14 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
     int i;
     int currentimg;
 
+    GdprHelper gdprHelper;
+    private final int DIALOG_DATE = 1;
+    int myYear = 2019;
+    int myMonth = 01;
+    int myDay = 01;
+
+    static BooVariable donate;
+
     public static class Example {
         static float sdown;
         static int uri = 0;
@@ -88,15 +103,23 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED, WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
-
+        ConsentInformation.getInstance(this).addTestDevice("3BEA0312B8906056A1FAD6120336C65E");
+        ConsentInformation.getInstance(this).setDebugGeography(DebugGeography.DEBUG_GEOGRAPHY_EEA);
         sp = getSharedPreferences("data", Activity.MODE_PRIVATE);
+        if (sp.getBoolean("newuser", true)) {
+            showDialog(DIALOG_DATE);
+        }
+
+
+        Bundle extras = new Bundle();
+        extras.putString("npa", sp.getString("bingle_age", "1"));
         MobileAds.initialize(MainActivity.this, "ca-app-pub-3254112346644116~7938885729");
         mAdView = findViewById(R.id.adView);
-        adRequest = new AdRequest.Builder().build();
+        adRequest = new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build();
         mInterstitialAd = new InterstitialAd(MainActivity.this);
         mInterstitialAd.setAdUnitId("ca-app-pub-3254112346644116/4389752444");
+
         mBillingClient = BillingClient.newBuilder(this).enablePendingPurchases().setListener(this).build();
         mBillingClient.startConnection(new BillingClientStateListener() {
 
@@ -106,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
                     List<Purchase> purchaseDataList = mBillingClient.queryPurchases(BillingClient.SkuType.INAPP).getPurchasesList();
                     if (purchaseDataList.size() != 0) {
                         sp.edit().putBoolean("adsdis", true).commit();
-                        mAdFree = sp.getBoolean("adsdis", false);
+                        mAdFree = true;
                     }
                     if (!mAdFree) {
                         mAdView.loadAd(adRequest);
@@ -127,15 +150,11 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
         mBuyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showDialog(IDD_CHECK_CATS2);
+                donate();
             }
         });
 
         mAdFree = sp.getBoolean("adsdis", false);
-        /*img = findViewById(R.id.imagePlayer);
-        img.setAdjustViewBounds(true);
-        img.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        img.setImageDrawable(getResources().getDrawable(drawable[0]));*/
         imgs = findViewById(R.id.imageSwitcher);
 
         Button button = findViewById(R.id.corky);
@@ -155,6 +174,39 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
 
     }
 
+
+    DatePickerDialog.OnDateSetListener myCallBack = new DatePickerDialog.OnDateSetListener() {
+
+        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            myYear = year;
+            myMonth = monthOfYear;
+            myDay = dayOfMonth;
+
+            sp.edit().putBoolean("newuser", false).putInt("age", getAge(myYear, myMonth, myDay)).commit();
+            if (sp.getInt("age", 0) < 13) {
+                sp.edit().putString("bingle_age", "1");
+                FirebaseAnalytics.getInstance(MainActivity.this).setAnalyticsCollectionEnabled(false);
+                ConsentInformation.getInstance(MainActivity.this).setTagForUnderAgeOfConsent(true);
+            } else {
+                sp.edit().putString("bingle_age", "0");
+                FirebaseAnalytics.getInstance(MainActivity.this).setAnalyticsCollectionEnabled(true);
+                ConsentInformation.getInstance(MainActivity.this).setTagForUnderAgeOfConsent(false);
+                gdprHelper = new GdprHelper(MainActivity.this);
+                gdprHelper.initialise();
+                donate = new BooVariable();
+                donate.setListener(new BooVariable.ChangeListener() {
+                    @Override
+                    public void onChange() {
+                        donate();
+                    }
+                });
+            }
+        }
+    };
+
+    public void donate() {
+        showDialog(IDD_CHECK_CATS2);
+    }
 
     @Override
     public void onPurchasesUpdated(BillingResult billingResult, List<Purchase> purchases) {
@@ -212,7 +264,6 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
 
         if (action == MotionEvent.ACTION_MOVE) {
             if (Example.sdown - event.getY() > 25 && i < 6 && currentimg != 6) {
-                //img.setImageDrawable(getResources().getDrawable(drawable[i + 1]));
                 imgs.showNext();
                 currentimg = i + 1;
                 i += 1;
@@ -220,7 +271,6 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
             }
             if (Example.sdown - event.getY() < -25 && i > 0 && currentimg != 0) {
                 imgs.showPrevious();
-                //img.setImageDrawable(getResources().getDrawable(drawable[i - 1]));
                 currentimg = i - 1;
                 i -= 1;
                 Example.sdown = event.getY();
@@ -229,7 +279,6 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
 
         if (action == MotionEvent.ACTION_UP) {
             if (i >= 3) {
-                //img.setImageDrawable(getResources().getDrawable(drawable[6]));
                 while (currentimg != 6) {
                     imgs.showNext();
                     currentimg += 1;
@@ -247,7 +296,6 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
                 }
 
             } else {
-                //img.setImageDrawable(getResources().getDrawable(drawable[0]));
                 while (currentimg != 0) {
                     imgs.showPrevious();
                     currentimg -= 1;
@@ -261,30 +309,6 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
 
             }
         }
-        /*if (action == MotionEvent.ACTION_UP) {
-            Example.sup = event.getY();
-            if (Example.sup - Example.sdown > 100 && Example.uri == 0) {    //close
-                Example.uri = 1;
-                img.setImageDrawable(getResources().getDrawable(R.drawable.animcl));
-                frameAnimation = (AnimationDrawable) img.getDrawable();
-                if (mCheckedItems[0]) mPlayer.start();
-                frameAnimation.start();
-                if (mCheckedItems[1]) v.vibrate(pattern, -1);
-
-            } else if (Example.sup - Example.sdown < -100 && Example.uri == 1) {    //open
-                Example.uri = 0;
-                Example.c += 1;
-                tv.setText(Example.c + "");
-                SharedPreferences.Editor editor = sp.edit();
-                editor.putInt("score", Example.c);
-                editor.apply();
-                img.setImageDrawable(getResources().getDrawable(R.drawable.animop));
-                frameAnimation = (AnimationDrawable) img.getDrawable();
-                if (mCheckedItems[0]) mPlayer1.start();
-                frameAnimation.start();
-                if (mCheckedItems[1]) v.vibrate(20);
-            }
-        }*/
         return false;
     }
 
@@ -360,6 +384,37 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
                 return builder.create();
 
 
+            case DIALOG_DATE:
+                //if (id == DIALOG_DATE) {
+                builder = new AlertDialog.Builder(this);
+                builder.setCancelable(false);
+                builder.setTitle("Please, choose date, month and year of your birth. We don't use this information.");
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        showDialog(100);
+                    }
+                });
+                builder.setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        System.exit(0);
+                    }
+                });
+                return builder.create();
+            //}
+            //return super.onCreateDialog(id);
+            case 100:
+                DatePickerDialog tpd = new DatePickerDialog(this, myCallBack, myYear, myMonth, myDay);
+                tpd.setTitle("Please, choose date, month and year of your birth. We don't use this information.");
+                tpd.setCancelable(false);
+                tpd.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        showDialog(DIALOG_DATE);
+                    }
+                });
+                return tpd;
             case IDD_CHECK_CATS2:
                 LayoutInflater li = LayoutInflater.from(this);
                 final View view = li.inflate(R.layout.admin_order_change_view, null);
@@ -400,32 +455,6 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
                         }
                     }
                 });
-                /*builder.setTitle("Choose how much you want to pay to disable ads").setCancelable(true);
-                String[] animals = {"1$", "5$", "10$", "25$", "50$"};
-                builder.setItems(animals, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch (which) {
-                            case 0: //
-                                purchase(ITEM_SKU_ADREMOVAL);
-                                return;
-                            case 1: // 2
-                                purchase(ITEM_SKU_ADREMOVAL2);
-                                return;
-                            case 2: // 2
-                                purchase(ITEM_SKU_ADREMOVAL3);
-                                return;
-                            case 3: // 2
-                                purchase(ITEM_SKU_ADREMOVAL4);
-                                return;
-                            case 4: // 2
-                                purchase(ITEM_SKU_ADREMOVAL5);
-                        }
-                    }
-                });
-                return builder.create();*/
-
-
             default:
                 return null;
 
@@ -448,28 +477,20 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
         });
     }
 
-    /*public void onBackPressed() {
-        super.onBackPressed();
-        if (mAdFree != null) if (!mAdFree) {
-            try {
-                mInterstitialAd.show();
-            } catch (IllegalStateException e) {
+    private int getAge(int year, int month, int day) {
+        Calendar dob = Calendar.getInstance();
+        Calendar today = Calendar.getInstance();
 
-            }
+        dob.set(year, month, day);
 
+        int age = today.get(Calendar.YEAR) - dob.get(Calendar.YEAR);
+
+        if (today.get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR)) {
+            age--;
         }
+
+        Integer ageInt = new Integer(age);
+
+        return ageInt;
     }
-
-    public void onDestroy() {
-        super.onDestroy();
-        if (mAdFree != null) if (!mAdFree) {
-            try {
-                mInterstitialAd.show();
-            } catch (IllegalStateException e) {
-
-            }
-        }
-    }*/
-
-
 }
