@@ -1,7 +1,6 @@
 package com.dmz.airpodscasesimulator;
 
 import android.app.Activity;
-import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -9,6 +8,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
@@ -18,9 +18,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.DatePicker;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.RadioGroup;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
@@ -28,32 +29,30 @@ import android.widget.ViewFlipper;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.MotionEventCompat;
 
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
-import com.android.billingclient.api.BillingResult;
-import com.android.billingclient.api.ConsumeParams;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsParams;
 import com.android.billingclient.api.SkuDetailsResponseListener;
-import com.google.ads.consent.ConsentInformation;
-import com.google.ads.consent.DebugGeography;
-import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
-import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
+
+import static com.android.billingclient.api.BillingClient.BillingResponse.ITEM_ALREADY_OWNED;
+import static com.android.billingclient.api.BillingClient.BillingResponse.OK;
+import static com.android.billingclient.api.BillingClient.BillingResponse.USER_CANCELED;
 
 public class MainActivity extends AppCompatActivity implements PurchasesUpdatedListener {
 
@@ -68,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
     private BillingClient mBillingClient;
 
     public ViewFlipper imgs;
+    public ViewFlipper imgsPro;
     public TextView tv;
     public MediaPlayer mPlayer;
     public MediaPlayer mPlayer1;
@@ -78,17 +78,25 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
     private final int IDD_CHECK_CATS = 3;
     private final int IDD_CHECK_CATS2 = 4;
     AdRequest adRequest;
-    AdView mAdView;
-    InterstitialAd mInterstitialAd;
-    Boolean mAdFree;
+    AdView mAdView = null;
+    InterstitialAd mInterstitialAd = null;
+    Boolean mAdFree = false;
     int i;
     int currentimg;
+    int currentimgPro;
+    Boolean pro;
 
-    GdprHelper gdprHelper;
+    ConstraintLayout constraintLayoutCommon;
+    ConstraintLayout constraintLayoutPro;
+
+    ImageButton mBuyButton;
+    Button button;
+
+    /*GdprHelper gdprHelper;
     private final int DIALOG_DATE = 1;
-    int myYear = 2019;
+    int myYear = 2000;
     int myMonth = 01;
-    int myDay = 01;
+    int myDay = 01;*/
 
     static BooVariable donate;
 
@@ -104,38 +112,41 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED, WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
-        ConsentInformation.getInstance(this).addTestDevice("3BEA0312B8906056A1FAD6120336C65E");
-        ConsentInformation.getInstance(this).setDebugGeography(DebugGeography.DEBUG_GEOGRAPHY_EEA);
         sp = getSharedPreferences("data", Activity.MODE_PRIVATE);
-        if (sp.getBoolean("newuser", true)) {
+        /*if (sp.getBoolean("newuser1", true)) {
             showDialog(DIALOG_DATE);
-        }
+        }*/
 
+        constraintLayoutCommon = findViewById(R.id.common);
+        constraintLayoutPro = findViewById(R.id.pro);
 
         Bundle extras = new Bundle();
-        extras.putString("npa", sp.getString("bingle_age", "1"));
-        MobileAds.initialize(MainActivity.this, "ca-app-pub-3254112346644116~7938885729");
+        //extras.putString("npa", sp.getString("bingle_age", "0"));
+        MobileAds.initialize(this, "ca-app-pub-3254112346644116~7938885729");
         mAdView = findViewById(R.id.adView);
-        adRequest = new AdRequest.Builder().addNetworkExtrasBundle(AdMobAdapter.class, extras).build();
+        adRequest = new AdRequest.Builder().build();//.addTestDevice("3B79C89427C65674A4AB312FF9F08222")
         mInterstitialAd = new InterstitialAd(MainActivity.this);
         mInterstitialAd.setAdUnitId("ca-app-pub-3254112346644116/4389752444");
+        mAdView.loadAd(adRequest);
+        mInterstitialAd.loadAd(adRequest);
 
-        mBillingClient = BillingClient.newBuilder(this).enablePendingPurchases().setListener(this).build();
+        mBillingClient = BillingClient.newBuilder(this).setListener(this).build();
         mBillingClient.startConnection(new BillingClientStateListener() {
 
+
             @Override
-            public void onBillingSetupFinished(BillingResult billingResult) {
-                if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+            public void onBillingSetupFinished(int i) {
+                if (i == OK) {
                     List<Purchase> purchaseDataList = mBillingClient.queryPurchases(BillingClient.SkuType.INAPP).getPurchasesList();
                     if (purchaseDataList.size() != 0) {
                         sp.edit().putBoolean("adsdis", true).commit();
                         mAdFree = true;
                     }
                     if (!mAdFree) {
-                        mAdView.loadAd(adRequest);
-                        mInterstitialAd.loadAd(adRequest);
+                        //Toast.makeText(MainActivity.this, "ad true", Toast.LENGTH_LONG).show();
                     } else {
                         mAdView.setVisibility(View.GONE);
+                        //Toast.makeText(MainActivity.this, "ad false", Toast.LENGTH_LONG).show();
                     }
                 }
             }
@@ -146,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
             }
         });
 
-        ImageButton mBuyButton = findViewById(R.id.buyButton);
+        mBuyButton = findViewById(R.id.buyButton);
         mBuyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -156,14 +167,10 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
 
         mAdFree = sp.getBoolean("adsdis", false);
         imgs = findViewById(R.id.imageSwitcher);
+        imgsPro = findViewById(R.id.imageSwitcher2);
 
-        Button button = findViewById(R.id.corky);
+        button = findViewById(R.id.corky);
         tv = findViewById(R.id.textView);
-
-        Example.c = sp.getInt("score", 0);
-        mCheckedItems[0] = sp.getBoolean("sound", true);
-        mCheckedItems[1] = sp.getBoolean("vibr", true);
-        tv.setText(Example.c + "");
 
         Example.uri = 1;
         button.setOnClickListener(mCorkyListener);
@@ -172,17 +179,24 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
         mPlayer = MediaPlayer.create(this, R.raw.acl4_7);
         mPlayer1 = MediaPlayer.create(this, R.raw.opaudio);
 
+        pro = sp.getBoolean("pro", true);
+
+        switchPro(pro);
+        mCheckedItems[0] = sp.getBoolean("sound", true);
+        mCheckedItems[1] = sp.getBoolean("vibr", true);
+        tv.setText(Example.c + "");
+
     }
 
 
-    DatePickerDialog.OnDateSetListener myCallBack = new DatePickerDialog.OnDateSetListener() {
+    /*DatePickerDialog.OnDateSetListener myCallBack = new DatePickerDialog.OnDateSetListener() {
 
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
             myYear = year;
             myMonth = monthOfYear;
             myDay = dayOfMonth;
 
-            sp.edit().putBoolean("newuser", false).putInt("age", getAge(myYear, myMonth, myDay)).commit();
+            sp.edit().putBoolean("newuser1", false).putInt("age", getAge(myYear, myMonth, myDay)).commit();
             if (sp.getInt("age", 0) < 13) {
                 sp.edit().putString("bingle_age", "1");
                 FirebaseAnalytics.getInstance(MainActivity.this).setAnalyticsCollectionEnabled(false);
@@ -202,45 +216,44 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
                 });
             }
         }
-    };
+    };*/
 
     public void donate() {
         showDialog(IDD_CHECK_CATS2);
     }
 
     @Override
-    public void onPurchasesUpdated(BillingResult billingResult, List<Purchase> purchases) {
+    public void onPurchasesUpdated(int billingResult, List<Purchase> purchases) {
 
 
-        if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && purchases != null) {
+        if (billingResult == OK && purchases != null) {
             for (Purchase purchase : purchases) {
                 handlePurchase(purchase);
             }
-        } else if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.USER_CANCELED) {
-            Log.d(TAG, "User Canceled" + billingResult.getResponseCode());
-        } else if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED) {
+        } else if (billingResult == USER_CANCELED) {
+            Log.d(TAG, "User Canceled" + billingResult);
+        } else if (billingResult == ITEM_ALREADY_OWNED) {
             sp.edit().putBoolean("adsdis", true).apply();
             mAdFree = sp.getBoolean("adsdis", false);
             List<Purchase> purchaseDataList = mBillingClient.queryPurchases(BillingClient.SkuType.INAPP).getPurchasesList();
             for (Purchase purchaseData : purchaseDataList) {
                 if (purchaseData.getSku().equals(lastSku)) {
-                    ConsumeParams consumeParams = ConsumeParams.newBuilder().setPurchaseToken(purchaseData.getPurchaseToken()).build();
-                    mBillingClient.consumeAsync(consumeParams, new ConsumeResponseListener() {
+                    mBillingClient.consumeAsync(purchaseData.getPurchaseToken(), new ConsumeResponseListener() {
                         @Override
-                        public void onConsumeResponse(BillingResult billingResult, String purchaseToken) {
+                        public void onConsumeResponse(int i, String s) {
                             purchase(lastSku);
                         }
                     });
                 }
             }
         } else {
-            Log.d(TAG, "Other code" + billingResult.getResponseCode());
+            Log.d(TAG, "Other code" + billingResult);
         }
     }
 
 
     private void handlePurchase(Purchase purchase) {
-        if (purchase.getSku().equals(ITEM_SKU_ADREMOVAL) || purchase.getSku().equals(ITEM_SKU_ADREMOVAL2) || purchase.getSku().equals(ITEM_SKU_ADREMOVAL3)) {
+        if (purchase.getSku().equals(ITEM_SKU_ADREMOVAL) || purchase.getSku().equals(ITEM_SKU_ADREMOVAL2) || purchase.getSku().equals(ITEM_SKU_ADREMOVAL3) || purchase.getSku().equals(ITEM_SKU_ADREMOVAL4) || purchase.getSku().equals(ITEM_SKU_ADREMOVAL5)) {
             sp.edit().putBoolean("adsdis", true).apply();
             mAdFree = sp.getBoolean("adsdis", false);
             MainActivity.this.recreate();
@@ -256,59 +269,152 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
 
         int action = MotionEventCompat.getActionMasked(event);
 
-        if (action == MotionEvent.ACTION_DOWN) {
-            Example.sdown = event.getY();
-            if (currentimg == 0) i = 0;
-            else i = 6;
-        }
-
-        if (action == MotionEvent.ACTION_MOVE) {
-            if (Example.sdown - event.getY() > 25 && i < 6 && currentimg != 6) {
-                imgs.showNext();
-                currentimg = i + 1;
-                i += 1;
-                Example.sdown = event.getY();
+        if (pro){
+            if (sp.getInt("scorepro", 0) % 10 == 0) if (mAdFree != null) if (!mAdFree) {
+                mInterstitialAd.show();
+                mInterstitialAd.loadAd(adRequest);
             }
-            if (Example.sdown - event.getY() < -25 && i > 0 && currentimg != 0) {
-                imgs.showPrevious();
-                currentimg = i - 1;
-                i -= 1;
-                Example.sdown = event.getY();
-            }
-        }
 
-        if (action == MotionEvent.ACTION_UP) {
-            if (i >= 3) {
-                while (currentimg != 6) {
+            if (action == MotionEvent.ACTION_DOWN) {
+                Example.sdown = event.getY();
+                if (currentimgPro == 0) i = 0;
+                else i = 9;
+            }
+
+            if (action == MotionEvent.ACTION_MOVE) {
+                if (Example.sdown - event.getY() > 20 && i < 9 && currentimgPro != 9) {
+                    imgsPro.showNext();
+
+                    currentimgPro = i + 1;
+                    if (currentimgPro == 9) {
+                        Example.c += 1;
+                        if (mCheckedItems[0]) mPlayer1.start();
+                        if (mCheckedItems[1]) v.vibrate(20);
+                    }
+                    i += 1;
+                    Example.sdown = event.getY();
+                }
+
+
+                if (Example.sdown - event.getY() < -20 && i > 0 && currentimgPro != 0) {
+                    imgsPro.showPrevious();
+                    currentimgPro = i - 1;
+                    if (currentimgPro == 0) {
+                        if (mCheckedItems[0]) mPlayer.start();
+                        if (mCheckedItems[1]) v.vibrate(25);
+                    }
+                    i -= 1;
+                    Example.sdown = event.getY();
+                }
+            }
+
+            if (action == MotionEvent.ACTION_UP) {
+                if (currentimgPro != 9) {
+                    if (i >= 4) {
+                        while (currentimgPro != 9) {
+                            imgsPro.showNext();
+                            currentimgPro += 1;
+                        }
+                        currentimgPro = 9;
+                        if (Example.uri == 1) {
+                            Example.c += 1;
+                            if (mCheckedItems[0]) mPlayer1.start();
+                            if (mCheckedItems[1]) v.vibrate(20);
+                            Example.uri = 0;
+                        }
+                    } else {
+                        while (currentimgPro != 0) {
+                            imgsPro.showPrevious();
+                            currentimgPro -= 1;
+                        }
+                        currentimgPro = 0;
+                        if (Example.uri == 0) {
+                            if (mCheckedItems[0]) mPlayer.start();
+                            if (mCheckedItems[1]) v.vibrate(25);
+                            Example.uri = 1;
+                        }
+
+                    }
+                }
+            }
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putInt("scorepro", Example.c);
+            editor.apply();
+        }
+        else
+        {
+            if (sp.getInt("score", 0) % 10 == 0) if (mAdFree != null) if (!mAdFree) {
+                mInterstitialAd.show();
+                mInterstitialAd.loadAd(adRequest);
+            }
+
+            if (action == MotionEvent.ACTION_DOWN) {
+                Example.sdown = event.getY();
+                if (currentimg == 0) i = 0;
+                else i = 6;
+            }
+
+            if (action == MotionEvent.ACTION_MOVE) {
+                if (Example.sdown - event.getY() > 25 && i < 6 && currentimg != 6) {
                     imgs.showNext();
-                    currentimg += 1;
-                }
-                currentimg = 6;
-                if (Example.uri == 1) {
-                    Example.c += 1;
-                    tv.setText(Example.c + "");
-                    SharedPreferences.Editor editor = sp.edit();
-                    editor.putInt("score", Example.c);
-                    editor.apply();
-                    if (mCheckedItems[0]) mPlayer1.start();
-                    if (mCheckedItems[1]) v.vibrate(20);
-                    Example.uri = 0;
+                    currentimg = i + 1;
+                    if (currentimg == 6) {
+                        Example.c += 1;
+                        if (mCheckedItems[0]) mPlayer1.start();
+                        if (mCheckedItems[1]) v.vibrate(20);
+                    }
+                    i += 1;
+                    Example.sdown = event.getY();
                 }
 
-            } else {
-                while (currentimg != 0) {
+
+                if (Example.sdown - event.getY() < -25 && i > 0 && currentimg != 0) {
                     imgs.showPrevious();
-                    currentimg -= 1;
+                    currentimg = i - 1;
+                    if (currentimg == 0) {
+                        if (mCheckedItems[0]) mPlayer.start();
+                        if (mCheckedItems[1]) v.vibrate(25);
+                    }
+                    i -= 1;
+                    Example.sdown = event.getY();
                 }
-                currentimg = 0;
-                if (Example.uri == 0) {
-                    if (mCheckedItems[0]) mPlayer.start();
-                    if (mCheckedItems[1]) v.vibrate(25);
-                    Example.uri = 1;
-                }
-
             }
+
+            if (action == MotionEvent.ACTION_UP) {
+                if (currentimg != 6) {
+                    if (i >= 3) {
+                        while (currentimg != 6) {
+                            imgs.showNext();
+                            currentimg += 1;
+                        }
+                        currentimg = 6;
+                        if (Example.uri == 1) {
+                            Example.c += 1;
+                            if (mCheckedItems[0]) mPlayer1.start();
+                            if (mCheckedItems[1]) v.vibrate(20);
+                            Example.uri = 0;
+                        }
+                    } else {
+                        while (currentimg != 0) {
+                            imgs.showPrevious();
+                            currentimg -= 1;
+                        }
+                        currentimg = 0;
+                        if (Example.uri == 0) {
+                            if (mCheckedItems[0]) mPlayer.start();
+                            if (mCheckedItems[1]) v.vibrate(25);
+                            Example.uri = 1;
+                        }
+
+                    }
+                }
+            }
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putInt("score", Example.c);
+            editor.apply();
         }
+
+        tv.setText(Example.c + "");
         return false;
     }
 
@@ -319,6 +425,24 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
         }
     };
 
+    void switchPro(Boolean isPro) {
+        if (isPro) {
+            Example.c = sp.getInt("scorepro", 0);
+            tv.setText(Example.c + "");
+            constraintLayoutPro.setVisibility(View.VISIBLE);
+            constraintLayoutCommon.setVisibility(View.GONE);
+
+
+        } else {
+            Example.c = sp.getInt("score", 0);
+            tv.setText(Example.c + "");
+            constraintLayoutCommon.setVisibility(View.VISIBLE);
+            constraintLayoutPro.setVisibility(View.GONE);
+
+
+        }
+    }
+
     @Override
     protected Dialog onCreateDialog(int id) {
         AlertDialog.Builder builder;
@@ -328,7 +452,25 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
 
                 final String[] checkName = {"Sound", "Vibration"};
                 builder = new AlertDialog.Builder(this);
-                builder.setTitle("Settings").setCancelable(true)
+                /*Switch switchval=new Switch(MainActivity.this);
+                RelativeLayout relative=new RelativeLayout(MainActivity.this);
+                relative.addView(switchval);*/
+                View view1 = getLayoutInflater().inflate(R.layout.btn_share, null);
+                builder.setCustomTitle(view1);
+                Switch switch1 = (Switch) view1.findViewById(R.id.switch1);
+                switch1.setActivated(sp.getBoolean("pro", true));
+                switch1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+                    @Override
+                    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                        SharedPreferences.Editor editor = sp.edit();
+                        editor.putBoolean("pro", b);
+                        pro = b;
+                        switchPro(pro);
+                    }
+                });
+
+                builder//.setTitle("Settings").setCancelable(true)
 
                         .setMultiChoiceItems(checkName, mCheckedItems, new DialogInterface.OnMultiChoiceClickListener() {
                             @Override
@@ -355,6 +497,7 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
                                     {
                                         try {
                                             mInterstitialAd.show();
+                                            mInterstitialAd.loadAd(adRequest);
                                         } catch (IllegalStateException ignored) {
 
                                         }
@@ -378,13 +521,14 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
                         tv.setText(Example.c + "");
                         SharedPreferences.Editor editor = sp.edit();
                         editor.putInt("score", Example.c);
+                        editor.putInt("scorepro", Example.c);
                         editor.apply();
                     }
                 });
                 return builder.create();
 
 
-            case DIALOG_DATE:
+            /*case DIALOG_DATE:
                 //if (id == DIALOG_DATE) {
                 builder = new AlertDialog.Builder(this);
                 builder.setCancelable(false);
@@ -401,10 +545,10 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
                         System.exit(0);
                     }
                 });
-                return builder.create();
+                return builder.create();*/
             //}
             //return super.onCreateDialog(id);
-            case 100:
+            /*case 100:
                 DatePickerDialog tpd = new DatePickerDialog(this, myCallBack, myYear, myMonth, myDay);
                 tpd.setTitle("Please, choose date, month and year of your birth. We don't use this information.");
                 tpd.setCancelable(false);
@@ -414,7 +558,7 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
                         showDialog(DIALOG_DATE);
                     }
                 });
-                return tpd;
+                return tpd;*/
             case IDD_CHECK_CATS2:
                 LayoutInflater li = LayoutInflater.from(this);
                 final View view = li.inflate(R.layout.admin_order_change_view, null);
@@ -470,14 +614,14 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
         SkuDetailsParams skuDetailsParams = SkuDetailsParams.newBuilder().setSkusList(skuList).setType(BillingClient.SkuType.INAPP).build();
         mBillingClient.querySkuDetailsAsync(skuDetailsParams, new SkuDetailsResponseListener() {
             @Override
-            public void onSkuDetailsResponse(BillingResult billingResult, List<SkuDetails> skuDetailsList) {
-                BillingFlowParams flowParams = BillingFlowParams.newBuilder().setSkuDetails(skuDetailsList.get(0)).build();
-                BillingResult responseCode = mBillingClient.launchBillingFlow(MainActivity.this, flowParams);
+            public void onSkuDetailsResponse(int i, List<SkuDetails> list) {
+                BillingFlowParams flowParams = BillingFlowParams.newBuilder().setSkuDetails(list.get(0)).build();
+                int response = mBillingClient.launchBillingFlow(MainActivity.this, flowParams);
             }
         });
     }
 
-    private int getAge(int year, int month, int day) {
+    /*private int getAge(int year, int month, int day) {
         Calendar dob = Calendar.getInstance();
         Calendar today = Calendar.getInstance();
 
@@ -492,5 +636,5 @@ public class MainActivity extends AppCompatActivity implements PurchasesUpdatedL
         Integer ageInt = new Integer(age);
 
         return ageInt;
-    }
+    }*/
 }

@@ -5,99 +5,244 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark"
+    android:fitsSystemWindows="true"
     tools:context=".MainActivity">
 
-    <ViewFlipper
-        android:id="@+id/imageSwitcher"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="50dp"
-        android:layout_marginLeft="50dp"
-        android:layout_marginEnd="50dp"
-        android:layout_marginRight="50dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/pro"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/imagePlayer1"
-            android:layout_width="match_parent"
+        <ViewFlipper
+            android:id="@+id/imageSwitcher2"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:src="@drawable/o1min"
-            android:adjustViewBounds="true"
-            android:background="@color/colorPrimaryDark"
-            android:cropToPadding="false"
-            android:scaleType="centerInside"
-            />
-        <ImageView
-            android:id="@+id/imagePlayer2"
-            android:layout_width="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/imagePlayer1_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@color/colorPrimaryDark"
+                android:cropToPadding="false"
+                android:scaleType="center"
+                android:src="@drawable/p10" />
+
+            <ImageView
+                android:id="@+id/imagePlayer2_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@color/colorPrimaryDark"
+                android:cropToPadding="false"
+                android:scaleType="center"
+                android:src="@drawable/p9" />
+
+            <ImageView
+                android:id="@+id/imagePlayer3_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@color/colorPrimaryDark"
+                android:cropToPadding="false"
+                android:scaleType="center"
+                android:src="@drawable/p8" />
+
+            <ImageView
+                android:id="@+id/imagePlayer4_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@color/colorPrimaryDark"
+                android:cropToPadding="false"
+                android:scaleType="center"
+                android:src="@drawable/p7" />
+
+            <ImageView
+                android:id="@+id/imagePlayer5_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@color/colorPrimaryDark"
+                android:cropToPadding="false"
+                android:scaleType="center"
+                android:src="@drawable/p6" />
+
+            <ImageView
+                android:id="@+id/imagePlayer6_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@color/colorPrimaryDark"
+                android:cropToPadding="false"
+                android:scaleType="center"
+                android:src="@drawable/p5" />
+
+            <ImageView
+                android:id="@+id/imagePlayer7_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@color/colorPrimaryDark"
+                android:cropToPadding="false"
+                android:scaleType="center"
+                android:src="@drawable/p4" />
+
+            <ImageView
+                android:id="@+id/imagePlayer8_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@color/colorPrimaryDark"
+                android:cropToPadding="false"
+                android:scaleType="center"
+                android:src="@drawable/p3" />
+
+            <ImageView
+                android:id="@+id/imagePlayer9_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@color/colorPrimaryDark"
+                android:cropToPadding="false"
+                android:scaleType="center"
+                android:src="@drawable/p2" />
+
+            <ImageView
+                android:id="@+id/imagePlayer10_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@color/colorPrimaryDark"
+                android:cropToPadding="false"
+                android:scaleType="center"
+                android:src="@drawable/p1" />
+        </ViewFlipper>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/common"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FFFFFF"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ViewFlipper
+            android:id="@+id/imageSwitcher"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:src="@drawable/o2min"
-            android:adjustViewBounds="true"
-            android:background="@color/colorPrimaryDark"
-            android:cropToPadding="false"
-            android:scaleType="centerInside"
-            />
-        <ImageView
-            android:id="@+id/imagePlayer3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:src="@drawable/o3min"
-            android:adjustViewBounds="true"
-            android:background="@color/colorPrimaryDark"
-            android:cropToPadding="false"
-            android:scaleType="centerInside"
-            />
-        <ImageView
-            android:id="@+id/imagePlayer4"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:src="@drawable/o4min"
-            android:adjustViewBounds="true"
-            android:background="@color/colorPrimaryDark"
-            android:cropToPadding="false"
-            android:scaleType="centerInside"
-            />
-        <ImageView
-            android:id="@+id/imagePlayer5"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:src="@drawable/o5min"
-            android:adjustViewBounds="true"
-            android:background="@color/colorPrimaryDark"
-            android:cropToPadding="false"
-            android:scaleType="centerInside"
-            />
-        <ImageView
-            android:id="@+id/imagePlayer6"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:src="@drawable/o6min"
-            android:adjustViewBounds="true"
-            android:background="@color/colorPrimaryDark"
-            android:cropToPadding="false"
-            android:scaleType="centerInside"
-            />
-        <ImageView
-            android:id="@+id/imagePlayer7"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:src="@drawable/o7min"
-            android:adjustViewBounds="true"
-            android:background="@color/colorPrimaryDark"
-            android:cropToPadding="false"
-            android:scaleType="centerInside"
-            />
-    </ViewFlipper>
+            android:layout_marginStart="50dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginEnd="50dp"
+            android:layout_marginRight="50dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/imagePlayer1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@color/colorPrimaryDark"
+                android:cropToPadding="false"
+                android:scaleType="centerInside"
+                android:src="@drawable/o1min" />
+
+            <ImageView
+                android:id="@+id/imagePlayer2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@color/colorPrimaryDark"
+                android:cropToPadding="false"
+                android:scaleType="centerInside"
+                android:src="@drawable/o2min" />
+
+            <ImageView
+                android:id="@+id/imagePlayer3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@color/colorPrimaryDark"
+                android:cropToPadding="false"
+                android:scaleType="centerInside"
+                android:src="@drawable/o3min" />
+
+            <ImageView
+                android:id="@+id/imagePlayer4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@color/colorPrimaryDark"
+                android:cropToPadding="false"
+                android:scaleType="centerInside"
+                android:src="@drawable/o4min" />
+
+            <ImageView
+                android:id="@+id/imagePlayer5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@color/colorPrimaryDark"
+                android:cropToPadding="false"
+                android:scaleType="centerInside"
+                android:src="@drawable/o5min" />
+
+            <ImageView
+                android:id="@+id/imagePlayer6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@color/colorPrimaryDark"
+                android:cropToPadding="false"
+                android:scaleType="centerInside"
+                android:src="@drawable/o6min" />
+
+            <ImageView
+                android:id="@+id/imagePlayer7"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@color/colorPrimaryDark"
+                android:cropToPadding="false"
+                android:scaleType="centerInside"
+                android:src="@drawable/o7min" />
+        </ViewFlipper>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
@@ -106,8 +251,9 @@
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginTop="13dp"
+        android:background="#00000000"
         android:text="@string/_0"
-        android:textColor="#80000000"
+        android:textColor="#7F7F7F"
         android:textSize="20sp"
         android:textStyle="bold"
         android:typeface="monospace"
@@ -124,7 +270,7 @@
         android:paddingEnd="-5dp"
         android:paddingRight="-5dp"
         android:text="@string/menu"
-        android:textColor="#80000000"
+        android:textColor="#7F7F7F"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -157,6 +303,7 @@
         android:paddingTop="11dp"
         android:src="@drawable/adbutton"
 
+        android:tint="#7F7F7F"
         app:layout_anchorGravity="top|center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
